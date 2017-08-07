@@ -76,6 +76,18 @@ func (x *CtlCommand) Execute(args []string) error {
 			}
 		}
 
+		////////////////////////////////////////////////////////////////////////////////
+		// RESTART
+		////////////////////////////////////////////////////////////////////////////////
+	case "restart":
+		if reply, err := rpcc.Restart(); err == nil {
+			if reply.Value {
+				fmt.Printf("Restarted\n")
+			} else {
+				fmt.Printf("Hmmm! Something gone wrong?!\n")
+			}
+		}
+
 	default:
 		fmt.Println("unknown command")
 	}

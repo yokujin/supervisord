@@ -20,6 +20,7 @@ type StartStopReply struct {
 	Value bool
 }
 type ShutdownReply StartStopReply
+type RestartReply StartStopReply
 
 type AllProcessInfoReply struct {
 	Value []ProcessInfo
@@ -86,6 +87,21 @@ func (r *XmlRPCClient) ChangeProcessState(change string, processName string) (re
 func (r *XmlRPCClient) Shutdown() (reply ShutdownReply, err error) {
 	ins := struct{}{}
 	buf, _ := xml.EncodeClientRequest("supervisor.shutdown", &ins)
+
+	resp, err := http.Post(r.Url(), "text/xml", bytes.NewBuffer(buf))
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+
+	err = xml.DecodeClientResponse(resp.Body, &reply)
+
+	return
+}
+
+func (r *XmlRPCClient) Restart() (reply RestartReply, err error) {
+	ins := struct{}{}
+	buf, _ := xml.EncodeClientRequest("supervisor.restart", &ins)
 
 	resp, err := http.Post(r.Url(), "text/xml", bytes.NewBuffer(buf))
 	if err != nil {
