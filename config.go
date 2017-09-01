@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -297,7 +298,7 @@ func (c *ConfigEntry) GetEnv(key string) []string {
 					i++
 				}
 				if i < n {
-					env = append(env, fmt.Sprintf("%s=\"%s\"", key, value[start+1:i]))
+					env = append(env, fmt.Sprintf("%s=%s", key, value[start+1:i]))
 				}
 				if i+1 < n && value[i+1] == ',' {
 					start = i + 2
@@ -309,10 +310,10 @@ func (c *ConfigEntry) GetEnv(key string) []string {
 					i++
 				}
 				if i < n {
-					env = append(env, fmt.Sprintf("%s=\"%s\"", key, value[start:i]))
+					env = append(env, fmt.Sprintf("%s=%s", key, value[start:i]))
 					start = i + 1
 				} else {
-					env = append(env, fmt.Sprintf("%s=\"%s\"", key, value[start:]))
+					env = append(env, fmt.Sprintf("%s=%s", key, value[start:]))
 					break
 				}
 			}
@@ -353,10 +354,15 @@ func (c *ConfigEntry) GetStringExpression(key string, defValue string) string {
 		return s
 	}
 
+	host_name, err := os.Hostname()
+	if err != nil {
+		host_name = "Unknown"
+	}
 	result, err := NewStringExpression("program_name", c.GetProgramName(),
 		"process_num", c.GetString("process_num", "0"),
 		"group_name", c.GetGroupName(),
-		"here", c.ConfigDir).Eval(s)
+		"here", c.ConfigDir,
+		"host_node_name", host_name).Eval(s)
 
 	if err != nil {
 		log.WithFields(log.Fields{
